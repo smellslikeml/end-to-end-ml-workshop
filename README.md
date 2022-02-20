@@ -1,2 +1,4 @@
-# end-to-end-ml-workshop
-End-to-End ML on Databricks Workshop materials
+# End-to-End ML on Databricks Workshop
+
+
+Please clone this repo in your Databricks workspace using the [Repos](https://databricks.com/product/repos) feature.
