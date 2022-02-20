@@ -368,6 +368,17 @@ refined_mlflow_df.write.mode("overwrite").saveAsTable(f"{database_name}.experime
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Calculate Data Drift  
+# MAGIC   
+# MAGIC Understanding data drift is key to understanding when it is time to retrain your model. When you train a model, you are training it on a sample of data. While these training datasets are usually quite large, they don't represent changes that may happend to the data in the future. For instance, as new US census data gets collected, new societal factors could appear in the data coming into the model to be scored that the model does not know how to properly score.  
+# MAGIC   
+# MAGIC Monitoring for this drift is important so that you can retrain and refresh the model to allow for the model to adapt.  
+# MAGIC   
+# MAGIC The short example of this that we are showing today uses the [Kolmogorov-Smirnov test](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ks_2samp.html) to compare the distribution of the training dataset with the incoming data that is being scored by the model.
+
+# COMMAND ----------
+
 # running Kolmogorov-Smirnov test for numerical columns
 from scipy import stats
 from pyspark.sql.types import *
@@ -397,4 +408,16 @@ display(numerical_data_drift_df)
 
 # COMMAND ----------
 
+# Write results to a delta table for future analysis
 numerical_data_drift_df.write.mode("overwrite").saveAsTable(f"{database_name}.numerical_drift_income")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Future Directions
+# MAGIC 
+# MAGIC From here, you can visualize and query the various tables we created from training and data metadata using [Databricks SQL](https://databricks.com/product/databricks-sql). You can trigger alerts on custom queries to notify you when you should consider retraining your model.
+
+# COMMAND ----------
+
+
