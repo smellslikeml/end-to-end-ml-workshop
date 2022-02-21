@@ -18,11 +18,15 @@
 import mlflow
 import databricks.automl_runtime
 
+from pyspark.sql.functions import *
+
 # Use MLflow to track experiments
 mlflow.set_experiment("/Shared/ML-Workshop-2.0/End-to-End-ML/ml-workshop-income-classifier")
 
 target_col = "income"
 database_name = 'ml_income_workshop'
+user = dbutils.notebook.entry_point.getDbutils().notebook().getContext().tags().apply('user')
+
 
 # COMMAND ----------
 
@@ -292,10 +296,11 @@ shap_enabled = True
 if shap_enabled:
     from shap import KernelExplainer, summary_plot
     # Sample background data for SHAP Explainer. Increase the sample size to reduce variance.
-    train_sample = X_train.sample(n=min(100, len(X_train.index)))
+    sample_size = 500
+    train_sample = X_train.sample(n=sample_size)
 
     # Sample a single example from the validation set to explain. Increase the sample size and rerun for more thorough results.
-    example = X_val.sample(n=10)
+    example = X_val.sample(n=1)
 
     # Use Kernel SHAP to explain feature importance on the example from the validation set.
     predict = lambda x: model.predict_proba(pd.DataFrame(x, columns=X_train.columns))
@@ -348,8 +353,6 @@ print(f"runs:/{ mlflow_run.info.run_id }/model")
 
 # COMMAND ----------
 
-from pyspark.sql.functions import *
-
 expId = mlflow.get_experiment_by_name("/Shared/ML-Workshop-2.0/End-to-End-ML/ml-workshop-income-classifier").experiment_id
 
 mlflow_df = spark.read.format("mlflow-experiment").load(expId)
@@ -368,6 +371,31 @@ refined_mlflow_df.write.mode("overwrite").saveAsTable(f"{database_name}.experime
 
 # COMMAND ----------
 
+# MAGIC %md 
+# MAGIC We can also save our AutoML experiment results to a Delta Table
+
+# COMMAND ----------
+
+automl_mlflow = "/Users/salma.mayorquin@databricks.com/databricks_automl/22-02-20-03:37-01 - Data Preparation: Feature Engineering and AutoML-7b753624/01 - Data Preparation: Feature Engineering and AutoML-Experiment-7b753624"
+
+automl_expId = mlflow.get_experiment_by_name(automl_mlflow).experiment_id
+
+automl_mlflow_df = spark.read.format("mlflow-experiment").load(automl_expId)
+
+refined_automl_mlflow_df = automl_mlflow_df.select(col('run_id'), col("experiment_id"), explode(map_concat(col("metrics"), col("params"))), col('start_time'), col("end_time")) \
+                .filter("key != 'model'") \
+                .select("run_id", "experiment_id", "key", col("value").cast("float"), col('start_time'), col("end_time")) \
+                .groupBy("run_id", "experiment_id", "start_time", "end_time") \
+                .pivot("key") \
+                .sum("value") \
+                .withColumn("trainingDuration", col("end_time").cast("integer")-col("start_time").cast("integer")) # example of added column
+
+# COMMAND ----------
+
+refined_automl_mlflow_df.write.mode("overwrite").saveAsTable(f"{database_name}.automl_data_bronze")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ### Calculate Data Drift  
 # MAGIC   
@@ -383,24 +411,38 @@ refined_mlflow_df.write.mode("overwrite").saveAsTable(f"{database_name}.experime
 from scipy import stats
 from pyspark.sql.types import *
 
+from datetime import datetime
 
-p_value = 0.05
-drift_data = []
-
-numerical_cols = ["fnlwgt", "hours_per_week", "log_capital_gain", "log_capital_loss"]
-for col in numerical_cols:
+def calculate_numerical_drift(training_dataset, comparison_dataset, comparison_dataset_name, cols, p_value, date):
+  drift_data = []
+  for col in cols:
     passed = 1
-    test = stats.ks_2samp(df_loaded[col], inference_data[col])
+    test = stats.ks_2samp(training_dataset[col], comparison_dataset[col])
     if test[1] < p_value:
-         passed = 0
-    drift_data.append((col, float(test[0]), float(test[1]), passed))
+      passed = 0
+    drift_data.append((date, comparison_dataset_name, col, float(test[0]), float(test[1]), passed))
+  return drift_data
 
 # COMMAND ----------
 
-driftSchema = StructType([ StructField("column", StringType(), True)\
-                       ,StructField("statistic", FloatType(), True)\
-                       ,StructField("pvalue", FloatType(), True)\
-                       ,StructField("passed", IntegerType(), True)\
+p_value = 0.05
+numerical_cols = ["fnlwgt", "hours_per_week", "log_capital_gain", "log_capital_loss"]
+
+dataset_name = "ml_income_workshop.inference_income"
+date = datetime.strptime("2000-01-01", '%Y-%m-%d').date() # simulated date for demo purpose
+
+numerical_cols = ["fnlwgt", "hours_per_week", "log_capital_gain", "log_capital_loss"]
+
+drift_data = calculate_numerical_drift(df_loaded, inference_data, dataset_name, numerical_cols, p_value, date)
+
+# COMMAND ----------
+
+driftSchema = StructType([StructField("date", DateType(), True), \
+                          StructField("dataset", StringType(), True), \
+                          StructField("column", StringType(), True), \
+                          StructField("statistic", FloatType(), True), \
+                          StructField("pvalue", FloatType(), True), \
+                          StructField("passed", IntegerType(), True)\
                       ])
 
 numerical_data_drift_df = spark.createDataFrame(data=drift_data, schema=driftSchema)
@@ -408,8 +450,91 @@ display(numerical_data_drift_df)
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS ml_income_workshop.numerical_drift_income
+
+# COMMAND ----------
+
 # Write results to a delta table for future analysis
 numerical_data_drift_df.write.mode("overwrite").saveAsTable(f"{database_name}.numerical_drift_income")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC We can perturbe our inference dataset to simulate how data can change over time.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS ml_income_workshop.modified_inference_data
+
+# COMMAND ----------
+
+import random
+
+def add_noise(value, max_noise=20):
+  """
+  Simulate change in distribution by adding random noise
+  """
+  noise = random.randint(0, max_noise)
+  return value + noise
+
+modified_inference_data = inference_data.copy()
+modified_inference_data[numerical_cols] = modified_inference_data[numerical_cols].apply(add_noise, axis = 1)
+
+modified_inference_data_df = spark.createDataFrame(modified_inference_data)
+
+# Write for future reference
+modified_inference_data_df.write.mode("overwrite").saveAsTable(f"{database_name}.modified_inference_data")
+display(modified_inference_data_df)
+
+# COMMAND ----------
+
+date = datetime.strptime("2010-01-01", '%Y-%m-%d').date() # simulated date for demo purpose
+dataset_name = "ml_income_workshop.modified_inference_income"
+
+modified_drift_data = calculate_numerical_drift(df_loaded, modified_inference_data, dataset_name, numerical_cols, p_value, date)
+
+modified_numerical_drift_data = spark.createDataFrame(data=modified_drift_data, schema=driftSchema)
+display(modified_numerical_drift_data)
+
+# COMMAND ----------
+
+# append this new data to our drift table
+modified_numerical_drift_data.write.format("delta").mode("append").saveAsTable("ml_income_workshop.numerical_drift_income")
+
+# COMMAND ----------
+
+display(spark.table("ml_income_workshop.numerical_drift_income"))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC We can also see how our model scores on this modified data
+
+# COMMAND ----------
+
+X_modified = modified_inference_data.drop([target_col], axis=1)
+y_modified = modified_inference_data[target_col]
+
+# Log metrics for the modified set
+xgbc_mod_metrics = mlflow.sklearn.eval_and_log_metrics(model, X_modified, y_modified, prefix="mod_")
+
+xgbc_mod_metrics = {k.replace("mod_", ""): v for k, v in xgbc_mod_metrics.items()}
+  
+mod_metrics_pdf = pd.DataFrame([xgbc_mod_metrics])
+mod_metrics_pdf["dataset"] = ["ml_income_workshop.modified_inference_income"]
+mod_metrics_df = spark.createDataFrame(mod_metrics_pdf)
+display(mod_metrics_df)
+
+# COMMAND ----------
+
+# append this new data to our metrics table
+mod_metrics_df.write.format("delta").mode("append").saveAsTable("ml_income_workshop.metric_data_bronze")
+
+# COMMAND ----------
+
+display(spark.table("ml_income_workshop.metric_data_bronze"))
 
 # COMMAND ----------
 
@@ -420,4 +545,5 @@ numerical_data_drift_df.write.mode("overwrite").saveAsTable(f"{database_name}.nu
 
 # COMMAND ----------
 
-
+# MAGIC %md
+# MAGIC [Here](https://e2-demo-field-eng.cloud.databricks.com/sql/dashboards/64cbc6a0-bbd8-4612-9275-67327099a6dd-end-to-end-ml-workshop?o=1444828305810485) is our simple dashboard example
