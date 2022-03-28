@@ -180,6 +180,11 @@ help(XGBClassifier)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Incorporating insights from Data Exploration: Downsampling
+
+# COMMAND ----------
+
 # RandomUnderSampler for class imbalance (decrease <=50K label count)
 from imblearn.under_sampling import RandomUnderSampler
 
@@ -392,7 +397,7 @@ refined_automl_mlflow_df = automl_mlflow_df.select(col('run_id'), col("experimen
 
 # COMMAND ----------
 
-refined_automl_mlflow_df.write.mode("overwrite").saveAsTable(f"{database_name}.automl_data_bronze")
+refined_automl_mlflow_df.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(f"{database_name}.automl_data_bronze")
 
 # COMMAND ----------
 

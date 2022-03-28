@@ -103,6 +103,10 @@ display(raw_df)
 
 # COMMAND ----------
 
+dbutils.data.summarize(raw_df)
+
+# COMMAND ----------
+
 # MAGIC %md By clicking on the `Data Profile` tab above we can easily generate descriptive statistics on our dataset
 
 # COMMAND ----------
@@ -248,6 +252,38 @@ spark.sql('''
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC Let's package the all the data processing into a function for later use
+
+# COMMAND ----------
+
+def process_census_data(dataframe):
+  """
+  Function to wrap specific processing for census data tables
+  Input and output is a pyspark.pandas dataframe
+  """
+  categorical_cols = ['workclass', 'education', 'marital_status', 
+                      'occupation', 'relationship', 'race', 'sex', 
+                      'native_country', 'income']
+  
+  # categorical column cleansing
+  for column in categorical_cols:
+    dataframe[column] = dataframe[column].apply(lambda value: category_cleaner(value))
+  
+  # bin age
+  dataframe['age_by_decade'] = dataframe['age'].apply(bin_age)
+  
+  # log transform
+  dataframe['log_capital_gain'] = dataframe['capital_gain'].apply(log_transform)
+  dataframe['log_capital_loss'] = dataframe['capital_loss'].apply(log_transform)
+  
+  # Drop columns
+  dataframe = dataframe.drop(['age', 'capital_gain', 'capital_loss'], axis = 1)
+  
+  return dataframe
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC Last but not least, let's create the same transformations to our inference dataset for testing later
 
 # COMMAND ----------
@@ -259,18 +295,8 @@ inference_pdf = (spark.read.schema(census_income_schema)
                           .csv(census_income_test_path)
                           .to_pandas_on_spark()
                )
-# Clean up categorical data
-for column in categorical_cols:
-  inference_pdf[column] = inference_pdf[column].apply(lambda value: category_cleaner(value))
 
-# Add new features
-inference_pdf['age_by_decade'] = inference_pdf['age'].apply(bin_age)
-
-inference_pdf['log_capital_gain'] = inference_pdf['capital_gain'].apply(log_transform)
-inference_pdf['log_capital_loss'] = inference_pdf['capital_loss'].apply(log_transform)
-
-# Drop columns
-inference_pdf = inference_pdf.drop(['age', 'capital_gain', 'capital_loss'], axis = 1)
+inference_pdf = process_census_data(inference_pdf)
 inference_pdf.to_delta(inference_tbl_path)
 
 spark.sql('''
@@ -284,13 +310,6 @@ spark.sql('''
 
 # MAGIC %md
 # MAGIC Great! Our dataset is ready for us to use with AutoML to train a benchmark model.
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC SELECT count(*)
-# MAGIC from clean_income
-# MAGIC group by income
 
 # COMMAND ----------
 
@@ -310,7 +329,7 @@ spark.sql('''
 
 import databricks.automl
 
-summary = databricks.automl.classify(clean_pdf, target_col='income', data_dir='dbfs:/automl/ml_income_workshop', timeout_minutes=30)
+summary = databricks.automl.classify(clean_pdf, target_col='income', primary_metric="f1", data_dir='dbfs:/automl/ml_income_workshop', timeout_minutes=30)
 
 # COMMAND ----------
 
