@@ -9,3 +9,5 @@ To access the latest ML features on databricks, including AutoML and `pyspark.pa
 Please clone this repo into your Databricks workspace using the [Repos](https://docs.databricks.com/repos/index.html) feature. 
 
 To create vizualizations and a dashboard to the one attached, make sure Databricks SQL is available for your workspace.
+
+Thank you!
