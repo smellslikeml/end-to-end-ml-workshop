@@ -13,10 +13,6 @@ import pyspark.pandas as pd
 
 # COMMAND ----------
 
-print("hello!")
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC 
 # MAGIC For this workshop we will use a publicly available adult dataset example found in `/databricks-datasets/`. We could also use Python or Spark to read data from databases or cloud storage.
