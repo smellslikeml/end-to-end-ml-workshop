@@ -172,7 +172,7 @@ avg_delay_by_origin.plot(kind = "bar", x = "occupation", y = "age")
 
 # MAGIC %md
 # MAGIC #### Data Wrangling
-# MAGIC We can leverage [`Pandas on Spark`](https://spark.apache.org/docs/latest/api/python/user_guide/pandas_on_spark/index.html) to clean and wrangle our data at scale. We are going to transform the `date` column from timestamp to dates and drop missing values.
+# MAGIC We can leverage [`Pandas on Spark`](https://spark.apache.org/docs/latest/api/python/user_guide/pandas_on_spark/index.html) to clean and wrangle our data at scale. We are going to drop missing values and clean up category values.
 
 # COMMAND ----------
 
