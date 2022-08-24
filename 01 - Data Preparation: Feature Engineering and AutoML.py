@@ -1,4 +1,8 @@
 # Databricks notebook source
+print("hello!")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## End to End ML on Databricks
 # MAGIC 

@@ -10,4 +10,4 @@ Please clone this repo into your Databricks workspace using the [Repos](https://
 
 To create vizualizations and a dashboard to the one attached, make sure Databricks SQL is available for your workspace.
 
-Thank you!
+Thank you! Have a nice day
