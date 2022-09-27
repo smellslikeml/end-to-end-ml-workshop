@@ -1,8 +1,4 @@
 # Databricks notebook source
-print("hello!")
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## End to End ML on Databricks
 # MAGIC 
@@ -107,11 +103,11 @@ display(raw_df)
 
 # COMMAND ----------
 
-dbutils.data.summarize(raw_df)
+# MAGIC %md By clicking on the `Data Profile` tab above we can easily generate descriptive statistics on our dataset. We can also call those results using `dbutils`
 
 # COMMAND ----------
 
-# MAGIC %md By clicking on the `Data Profile` tab above we can easily generate descriptive statistics on our dataset
+dbutils.data.summarize(raw_df)
 
 # COMMAND ----------
 
@@ -167,10 +163,10 @@ spark.sql('''
 raw_df_pdf = raw_df.to_pandas_on_spark()
 
 # perform the same aggregation we did in SQL using familiar Pandas syntax
-avg_delay_by_origin = raw_df_pdf.groupby("occupation").mean().round().reset_index()[["occupation", "age"]].sort_values("age", ascending = False)
+avg_age_by_occupation = raw_df_pdf.groupby("occupation").mean().round().reset_index()[["occupation", "age"]].sort_values("age", ascending = False)
 
 # re-create the same plot using familiar pandas and matplotlib syntax distributed with Spark
-avg_delay_by_origin.plot(kind = "bar", x = "occupation", y = "age")
+avg_age_by_occupation.plot(kind = "bar", x = "occupation", y = "age")
 
 # COMMAND ----------
 
