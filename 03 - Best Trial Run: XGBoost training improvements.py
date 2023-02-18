@@ -544,7 +544,7 @@ display(spark.table("ml_income_workshop.metric_data_bronze"))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Future Directions
+# MAGIC ## Drift Monitoring
 # MAGIC 
 # MAGIC From here, you can visualize and query the various tables we created from training and data metadata using [Databricks SQL](https://databricks.com/product/databricks-sql). You can trigger alerts on custom queries to notify you when you should consider retraining your model.
 

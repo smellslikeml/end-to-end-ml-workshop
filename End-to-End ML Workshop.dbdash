@@ -1,0 +1,1187 @@
+{
+  "queries": [
+    {
+      "id": "db8e820b-229a-4900-aa64-8b7f85445ebd",
+      "name": "AutoML MLflow Statistics",
+      "description": null,
+      "query": "SELECT\n  run_id, experiment_id, val_accuracy_score, val_f1_score, val_log_loss, val_precision_score, val_recall_score, val_roc_auc_score\nFROM\n  ml_income_workshop.automl_data_bronze",
+      "options": {
+        "run_as_role": "viewer",
+        "apply_auto_limit": true,
+        "visualization_control_order": [],
+        "parameters": []
+      },
+      "visualizations": [
+        {
+          "id": "5d0b079b-9d4f-4f63-8c65-1826ba1baaed",
+          "type": "TABLE",
+          "name": "Table",
+          "description": "",
+          "options": {
+            "version": 2
+          },
+          "query_plan": null
+        },
+        {
+          "id": "62d4b1b3-3f06-4d8e-9742-636b282e3c95",
+          "type": "CHART",
+          "name": "AutoML Result Scores",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "line",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": false
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "score"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true
+              }
+            ],
+            "alignYAxesAtZero": true,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": null,
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "column_967a7e074945": {
+                "yAxis": 0,
+                "type": "line",
+                "color": "#FB8D3D"
+              },
+              "column_967a7e074947": {
+                "yAxis": 0,
+                "type": "line",
+                "color": "#799CFF"
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]00000",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": false,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": false,
+            "columnConfigurationMap": {
+              "x": {
+                "column": "run_id",
+                "id": "column_967a7e074943"
+              },
+              "y": [
+                {
+                  "id": "column_967a7e074945",
+                  "column": "val_accuracy_score",
+                  "transform": "SUM"
+                },
+                {
+                  "id": "column_967a7e074947",
+                  "column": "val_roc_auc_score",
+                  "transform": "SUM"
+                }
+              ]
+            },
+            "isAggregationOn": true,
+            "condensed": true,
+            "withRowNumber": true
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "column": "run_id"
+              },
+              {
+                "function": "SUM",
+                "args": [
+                  {
+                    "column": "val_accuracy_score"
+                  }
+                ],
+                "alias": "column_967a7e074945"
+              },
+              {
+                "function": "SUM",
+                "args": [
+                  {
+                    "column": "val_roc_auc_score"
+                  }
+                ],
+                "alias": "column_967a7e074947"
+              }
+            ],
+            "groups": [
+              {
+                "column": "run_id"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "73855693-9186-4c2c-b0b8-eb19b9b65301",
+      "name": "ml_workshop_jja",
+      "description": null,
+      "query": "SELECT\n  CASE\n    WHEN dataset == \"ml_income_workshop.modified_inference_income\" THEN \"2010\"\n    ELSE \"2000\"\n  END year,\n  roc_auc_score\nFROM\n  ml_income_workshop.metric_data_bronze\nWHERE\n  (\n    dataset == \"ml_income_workshop.modified_inference_income\"\n  )\n  OR (dataset == \"ml_income_workshop.inference_income\")",
+      "options": {
+        "run_as_role": "viewer",
+        "apply_auto_limit": true,
+        "visualization_control_order": [],
+        "parameters": [],
+        "schema": "ml_income_workshop"
+      },
+      "visualizations": [
+        {
+          "id": "32cc71d3-bdd4-44e7-8024-a889c1a590bd",
+          "type": "CHART",
+          "name": "Metric Drift",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "column",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": true
+              },
+              "title": {
+                "text": "Year"
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "ROC AUC Score"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true,
+                "title": {
+                  "text": null
+                }
+              }
+            ],
+            "alignYAxesAtZero": false,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": null,
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "2000": {
+                "zIndex": 0
+              },
+              "2010": {
+                "zIndex": 1
+              },
+              "column_98f9dd6d178165": {
+                "yAxis": 0
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]00",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": false,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": true,
+            "columnConfigurationMap": {
+              "y": [
+                {
+                  "id": "column_98f9dd6d178165",
+                  "column": "roc_auc_score",
+                  "transform": "SUM"
+                }
+              ],
+              "series": {
+                "column": "year",
+                "id": "column_98f9dd6d178166"
+              }
+            },
+            "reverseX": false
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "function": "SUM",
+                "args": [
+                  {
+                    "column": "roc_auc_score"
+                  }
+                ],
+                "alias": "column_98f9dd6d178165"
+              },
+              {
+                "column": "year"
+              }
+            ],
+            "groups": [
+              {
+                "column": "year"
+              }
+            ]
+          }
+        },
+        {
+          "id": "9a26ccf2-ab2c-4f24-997c-52496889656e",
+          "type": "TABLE",
+          "name": "Table",
+          "description": "",
+          "options": {
+            "version": 2
+          },
+          "query_plan": null
+        }
+      ]
+    },
+    {
+      "id": "7c24cc9b-1208-4ac8-a5c8-48d881370300",
+      "name": "Numerical Data Drift",
+      "description": null,
+      "query": "-- SELECT\n--   SUM(\n--     CASE\n--       WHEN passed = 0 THEN 1\n--       ELSE 0\n--     END\n--   ) AS TOTAL_FAILURES\n-- FROM\n--   ml_income_workshop.numerical_drift_income\nSELECT\n  column feature,\n  statistic,\n  pvalue,\n  passed\nFROM\n  ml_income_workshop.numerical_drift_income\nWHERE\n  date = \"2010-01-01\"",
+      "options": {
+        "run_as_role": "viewer",
+        "apply_auto_limit": true,
+        "parameters": []
+      },
+      "visualizations": [
+        {
+          "id": "ce1b8be7-5199-47cd-85f0-2c534c157dd6",
+          "type": "COUNTER",
+          "name": "Numerical Data Drift",
+          "description": "",
+          "options": {
+            "counterLabel": "Numerical Data Drift",
+            "counterColName": "TOTAL_FAILURES",
+            "rowNumber": 1,
+            "targetRowNumber": 1,
+            "stringDecimal": 0,
+            "stringDecChar": ".",
+            "stringThouSep": ",",
+            "tooltipFormat": "0,0.000",
+            "showPlotlyControls": true
+          },
+          "query_plan": null
+        },
+        {
+          "id": "cec38337-543e-44c3-86cf-32f6c849bf30",
+          "type": "TABLE",
+          "name": "Table",
+          "description": "",
+          "options": {
+            "itemsPerPage": 25,
+            "condensed": false,
+            "columns": [
+              {
+                "dateTimeFormat": "YYYY-MM-DD",
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "date",
+                "type": "date",
+                "displayAs": "datetime",
+                "visible": true,
+                "order": 100000,
+                "title": "date",
+                "allowSearch": false,
+                "alignContent": "right",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              },
+              {
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "dataset",
+                "type": "string",
+                "displayAs": "string",
+                "visible": true,
+                "order": 100001,
+                "title": "dataset",
+                "allowSearch": false,
+                "alignContent": "left",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              },
+              {
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "column",
+                "type": "string",
+                "displayAs": "string",
+                "visible": true,
+                "order": 100002,
+                "title": "column",
+                "allowSearch": false,
+                "alignContent": "left",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              },
+              {
+                "numberFormat": "0.0000",
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "statistic",
+                "type": "float",
+                "displayAs": "number",
+                "visible": true,
+                "order": 100003,
+                "title": "statistic",
+                "allowSearch": false,
+                "alignContent": "right",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              },
+              {
+                "numberFormat": "0.0000",
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "pvalue",
+                "type": "float",
+                "displayAs": "number",
+                "visible": true,
+                "order": 100004,
+                "title": "pvalue",
+                "allowSearch": false,
+                "alignContent": "right",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              },
+              {
+                "numberFormat": "0",
+                "booleanValues": [
+                  "false",
+                  "true"
+                ],
+                "imageUrlTemplate": "{{ @ }}",
+                "imageTitleTemplate": "{{ @ }}",
+                "imageWidth": "",
+                "imageHeight": "",
+                "linkUrlTemplate": "{{ @ }}",
+                "linkTextTemplate": "{{ @ }}",
+                "linkTitleTemplate": "{{ @ }}",
+                "linkOpenInNewTab": true,
+                "name": "passed",
+                "type": "integer",
+                "displayAs": "number",
+                "visible": true,
+                "order": 100005,
+                "title": "passed",
+                "allowSearch": false,
+                "alignContent": "right",
+                "allowHTML": false,
+                "highlightLinks": false,
+                "useMonospaceFont": false,
+                "preserveWhitespace": false
+              }
+            ],
+            "version": 2,
+            "showPlotlyControls": true
+          },
+          "query_plan": null
+        }
+      ]
+    },
+    {
+      "id": "9e922cf6-b6ba-4833-8049-621944546a94",
+      "name": "Data Drift",
+      "description": null,
+      "query": "SELECT\n  avg(fnlwgt),\n  avg(hours_per_week),\n  avg(log_capital_gain),\n  avg(log_capital_loss),\n  '2010' year\nFROM\n  ml_income_workshop.modified_inference_data\nGROUP BY\n  year\nUNION\n  (\n    SELECT\n      avg(fnlwgt),\n      avg(hours_per_week),\n      avg(log_capital_gain),\n      avg(log_capital_loss),\n      '2000' year\n    FROM\n      ml_income_workshop.inference_income\n    GROUP BY\n      year\n  )",
+      "options": {
+        "run_as_role": "viewer",
+        "apply_auto_limit": false,
+        "parameters": []
+      },
+      "visualizations": [
+        {
+          "id": "120fbbef-e3a0-4bcf-979b-d54ce9e8d7d1",
+          "type": "CHART",
+          "name": "Avg Log of Capital Gain by Census Year",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "column",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": true
+              },
+              "title": {
+                "text": "Census Year"
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "Average Log of Capital Gain"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true
+              }
+            ],
+            "alignYAxesAtZero": false,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": "",
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "column_98f9dd6d93526": {
+                "yAxis": 0
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]00",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": true,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": true,
+            "columnConfigurationMap": {
+              "y": [
+                {
+                  "id": "column_98f9dd6d93526",
+                  "column": "avg(log_capital_gain)",
+                  "transform": "AVG"
+                }
+              ],
+              "series": {
+                "column": "year",
+                "id": "column_98f9dd6d93527"
+              }
+            }
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "function": "AVG",
+                "args": [
+                  {
+                    "column": "avg(log_capital_gain)"
+                  }
+                ],
+                "alias": "column_98f9dd6d93526"
+              },
+              {
+                "column": "year"
+              }
+            ],
+            "groups": [
+              {
+                "column": "year"
+              }
+            ]
+          }
+        },
+        {
+          "id": "1e9f8ad3-325e-420b-9b3e-de9a119b1073",
+          "type": "TABLE",
+          "name": "Table",
+          "description": "",
+          "options": {
+            "version": 2
+          },
+          "query_plan": null
+        },
+        {
+          "id": "7a94f3ab-f46c-4320-9098-eb521f27f7a5",
+          "type": "CHART",
+          "name": "Avg Final Weight by Census Year",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "column",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": true
+              },
+              "title": {
+                "text": "Census Year"
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "Final Weight"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true
+              }
+            ],
+            "alignYAxesAtZero": false,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": "",
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "column_98f9dd6d93526": {
+                "yAxis": 0
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": true,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": true,
+            "columnConfigurationMap": {
+              "y": [
+                {
+                  "id": "column_98f9dd6d93526",
+                  "column": "avg(fnlwgt)",
+                  "transform": "AVG"
+                }
+              ],
+              "series": {
+                "column": "year",
+                "id": "column_98f9dd6d93527"
+              }
+            }
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "function": "AVG",
+                "args": [
+                  {
+                    "column": "avg(fnlwgt)"
+                  }
+                ],
+                "alias": "column_98f9dd6d93526"
+              },
+              {
+                "column": "year"
+              }
+            ],
+            "groups": [
+              {
+                "column": "year"
+              }
+            ]
+          }
+        },
+        {
+          "id": "81bb793f-c7ee-44ab-a62b-83ddd1ff7c71",
+          "type": "CHART",
+          "name": "Avg Hours Per Week by Census Year",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "column",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": true
+              },
+              "title": {
+                "text": "Census Year"
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "Average Hours Per Week"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true
+              }
+            ],
+            "alignYAxesAtZero": false,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": "",
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "column_98f9dd6d93526": {
+                "yAxis": 0
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]00",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": true,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": true,
+            "columnConfigurationMap": {
+              "y": [
+                {
+                  "id": "column_98f9dd6d93526",
+                  "column": "avg(hours_per_week)",
+                  "transform": "SUM"
+                }
+              ],
+              "series": {
+                "column": "year",
+                "id": "column_98f9dd6d93527"
+              }
+            }
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "function": "SUM",
+                "args": [
+                  {
+                    "column": "avg(hours_per_week)"
+                  }
+                ],
+                "alias": "column_98f9dd6d93526"
+              },
+              {
+                "column": "year"
+              }
+            ],
+            "groups": [
+              {
+                "column": "year"
+              }
+            ]
+          }
+        },
+        {
+          "id": "f222a83d-c9cd-4d7b-b016-49e3dbfe4653",
+          "type": "CHART",
+          "name": "Avg Log of Capital Loss by Census Year",
+          "description": "",
+          "options": {
+            "version": 2,
+            "globalSeriesType": "column",
+            "sortX": true,
+            "sortY": true,
+            "legend": {
+              "traceorder": "normal"
+            },
+            "xAxis": {
+              "type": "-",
+              "labels": {
+                "enabled": true
+              },
+              "title": {
+                "text": "Census Year"
+              }
+            },
+            "yAxis": [
+              {
+                "type": "-",
+                "title": {
+                  "text": "Average Log of Capital Loss"
+                }
+              },
+              {
+                "type": "-",
+                "opposite": true
+              }
+            ],
+            "alignYAxesAtZero": false,
+            "error_y": {
+              "type": "data",
+              "visible": true
+            },
+            "series": {
+              "stacking": "",
+              "error_y": {
+                "type": "data",
+                "visible": true
+              }
+            },
+            "seriesOptions": {
+              "column_98f9dd6d93526": {
+                "yAxis": 0
+              }
+            },
+            "valuesOptions": {},
+            "direction": {
+              "type": "counterclockwise"
+            },
+            "sizemode": "diameter",
+            "coefficient": 1,
+            "numberFormat": "0,0[.]00",
+            "percentFormat": "0[.]00%",
+            "textFormat": "",
+            "missingValuesAsZero": true,
+            "useAggregationsUi": true,
+            "swappedAxes": true,
+            "dateTimeFormat": "YYYY-MM-DD HH:mm",
+            "showDataLabels": true,
+            "columnConfigurationMap": {
+              "y": [
+                {
+                  "id": "column_98f9dd6d93526",
+                  "column": "avg(log_capital_loss)",
+                  "transform": "AVG"
+                }
+              ],
+              "series": {
+                "column": "year",
+                "id": "column_98f9dd6d93527"
+              }
+            }
+          },
+          "query_plan": {
+            "selects": [
+              {
+                "function": "AVG",
+                "args": [
+                  {
+                    "column": "avg(log_capital_loss)"
+                  }
+                ],
+                "alias": "column_98f9dd6d93526"
+              },
+              {
+                "column": "year"
+              }
+            ],
+            "groups": [
+              {
+                "column": "year"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "dashboard": {
+    "id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+    "name": "End-to-End ML Workshop",
+    "widgets": [
+      {
+        "id": "6b658518-d04d-4fe4-b240-dd073193eef2",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 1,
+            "sizeY": 6,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 15
+          },
+          "title": "Avg Hours Per Week by Census Year",
+          "description": "",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "81bb793f-c7ee-44ab-a62b-83ddd1ff7c71"
+      },
+      {
+        "id": "b8698523-1924-41f1-8ca5-9177fd8f5503",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 1,
+            "sizeY": 6,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 2,
+            "row": 15
+          },
+          "title": "Avg Log of Capital Loss by Census Year",
+          "description": "",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "f222a83d-c9cd-4d7b-b016-49e3dbfe4653"
+      },
+      {
+        "id": "5d14c446-8b85-42ef-9f69-8bdddfb39ac6",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 1,
+            "sizeY": 6,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 1,
+            "row": 15
+          },
+          "title": "Avg Log of Capital Gain by Census Year",
+          "description": "",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "120fbbef-e3a0-4bcf-979b-d54ce9e8d7d1"
+      },
+      {
+        "id": "a5ba281b-d57e-4cfd-a79f-22cb6a3ff444",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 1,
+            "sizeY": 6,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 3,
+            "row": 15
+          },
+          "title": "Avg Final Weight by Census Year",
+          "description": "",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "7a94f3ab-f46c-4320-9098-eb521f27f7a5"
+      },
+      {
+        "id": "b6aa7926-4118-4ae3-badc-ee25be85cf8a",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 2,
+            "sizeY": 6,
+            "minSizeX": 2,
+            "maxSizeX": 6,
+            "minSizeY": 1,
+            "maxSizeY": 1000,
+            "col": 4,
+            "row": 15
+          }
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "cec38337-543e-44c3-86cf-32f6c849bf30"
+      },
+      {
+        "id": "b12de187-7388-458a-ad56-88823d68f110",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 2,
+            "sizeY": 5,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 23
+          },
+          "title": "Metric Drift",
+          "description": "",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "32cc71d3-bdd4-44e7-8024-a889c1a590bd"
+      },
+      {
+        "id": "f6898369-3f86-4019-9000-5b6bd2e2df3e",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 6,
+            "sizeY": 6,
+            "minSizeX": 2,
+            "maxSizeX": 6,
+            "minSizeY": 1,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 7
+          }
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "5d0b079b-9d4f-4f63-8c65-1826ba1baaed"
+      },
+      {
+        "id": "caae5f13-2fd2-4d3f-90bd-28b630d10876",
+        "width": 1,
+        "options": {
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 6,
+            "sizeY": 2,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 1,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 0
+          }
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "## AutoML Experiments (from MLflow)"
+      },
+      {
+        "id": "ed0c090f-9bee-48b7-b790-6502955cbea2",
+        "width": 1,
+        "options": {
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 6,
+            "sizeY": 2,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 1,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 13
+          },
+          "parameterMappings": {}
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "## Data Drift Detection"
+      },
+      {
+        "id": "8201b6eb-91ac-4e6d-abd2-7c8dc6c98090",
+        "width": 1,
+        "options": {
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 6,
+            "sizeY": 2,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 1,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 21
+          },
+          "parameterMappings": {}
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "## Metric Drift Detection"
+      },
+      {
+        "id": "d2320e3b-268c-4577-8c42-23fdb61c5d50",
+        "width": 1,
+        "options": {
+          "parameterMappings": {},
+          "isHidden": false,
+          "position": {
+            "autoHeight": false,
+            "sizeX": 6,
+            "sizeY": 5,
+            "minSizeX": 1,
+            "maxSizeX": 6,
+            "minSizeY": 5,
+            "maxSizeY": 1000,
+            "col": 0,
+            "row": 2
+          },
+          "description": "",
+          "title": "AutoML MLflow Statistics",
+          "overrideColors": false
+        },
+        "dashboard_id": "64cbc6a0-bbd8-4612-9275-67327099a6dd",
+        "text": "",
+        "visualization_id": "62d4b1b3-3f06-4d8e-9742-636b282e3c95"
+      }
+    ],
+    "tags": [],
+    "color_palette": null,
+    "dashboard_filters_enabled": false,
+    "parent": "folders/3715387154823535",
+    "is_archived": false
+  },
+  "version": "1.0"
+}

@@ -111,7 +111,7 @@ dbutils.data.summarize(raw_df)
 
 # COMMAND ----------
 
-# Create bronze table to query with SQL
+# Create table to query with SQL
 spark.sql('''
              CREATE TABLE {0}
              USING DELTA 
@@ -329,7 +329,7 @@ spark.sql('''
 
 import databricks.automl
 
-summary = databricks.automl.classify(clean_pdf, target_col='income', primary_metric="f1", data_dir='dbfs:/automl/ml_income_workshop', timeout_minutes=30)
+summary = databricks.automl.classify(clean_pdf, target_col='income', primary_metric="f1", data_dir='dbfs:/automl/ml_income_workshop', timeout_minutes=5)
 
 # COMMAND ----------
 
